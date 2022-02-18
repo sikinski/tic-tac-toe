@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'Bebas-Neue';
+  src: url(fonts/Averta-Bold.otf);
+  font-weight: normal;
+  font-style: normal;
+}
+
 html,
 body {
   height: 100%;
@@ -7,6 +14,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  font-family: 'Averta-Bold';
   background: linear-gradient(
     90deg,
     hsla(225, 100%, 63%, 1) 0%,
