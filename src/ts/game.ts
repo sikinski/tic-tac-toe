@@ -7,6 +7,9 @@ export class Game {
     public numCell: number = 3
     public btnArea: Array<object> = []
     public numPlayers: number = 1
+    public wins: number = 0
+    public losses: number = 0
+    public round: number = 0
 
     constructor(idContainer: string, width: number, height: number) {
         this.stage = new Konva.Stage({
@@ -123,10 +126,96 @@ export class Game {
         layer.add(groupBtns)
         this.stage.add(layer)
     }
+    renderNavigation() {
+        const layer = new Konva.Layer()
+
+        const container = new Konva.Rect({
+            x: 0,
+            y: 0,
+            width: this.stage.width() / 6,
+            height: this.stage.height(),
+        });
+        const borderRight = new Konva.Line({
+            points: [container.x() + container.width(), container.y(), container.x() + container.width(), container.y() + container.height()],
+            stroke: 'black',
+            shadowColor: 'black',
+            shadowBlur: 15,
+            shadowOffset: { x: 0, y: 10 },
+            shadowOpacity: 0.5,
+            strokeWidth: 2,
+            lineCap: 'round',
+        })
+
+        const heading = new Konva.Text({
+            x: container.x(),
+            y: 15,
+            width: container.width(),
+            text: 'menu',
+            fontSize: 30,
+            fontFamily: 'Averta-Bold',
+            align: 'center',
+            fill: 'black',
+        })
+
+        const underHeadingLine = new Konva.Line({
+            points: [heading.x(), heading.y() + heading.height() + 15, heading.x() + heading.width(), heading.y() + heading.height() + 15],
+            stroke: 'black',
+            shadowColor: 'black',
+            shadowBlur: 15,
+            shadowOffset: { x: 0, y: 10 },
+            shadowOpacity: 0.5,
+            strokeWidth: 2,
+            lineCap: 'round',
+        })
+
+        const list = new Konva.Group({
+            x: container.x(),
+            y: 40,
+        });
+
+        const items = [`round: ${this.round}`, `won: ${this.wins}`, `lost: ${this.losses}`, '3x3', '6x6', '9x9', 'info'];
+
+        for (let i = 0; i < items.length; i++) {
+            if (i < items.length - 1) {
+                const item = new Konva.Text({
+                    x: list.x(),
+                    y: list.y() + 20 + 60 * i,
+                    width: container.width(),
+                    text: items[i],
+                    fontSize: 20,
+                    fontFamily: 'Averta-Bold',
+                    align: 'center',
+                    fill: 'black',
+                })
+                list.add(item)
+            } else {
+                const bottomItem = new Konva.Text({
+                    x: list.x(),
+                    y: list.y() + container.height() - heading.height() - 100,
+                    width: container.width(),
+                    text: items[i],
+                    fontSize: 20,
+                    fontFamily: 'Averta-Bold',
+                    align: 'center',
+                    fill: 'black',
+                })
+                list.add(bottomItem)
+            }
+        }
+
+        layer.add(container)
+        layer.add(borderRight)
+        layer.add(heading)
+        layer.add(underHeadingLine)
+        layer.add(list)
+
+        this.stage.add(layer)
+    }
 
     initRender() {
         this.renderHeading()
         this.renderField()
         this.renderButtons()
+        this.renderNavigation()
     }
 }
