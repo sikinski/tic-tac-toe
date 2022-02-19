@@ -1,6 +1,9 @@
 import { Stage } from "konva/lib/Stage"
 
 import Konva from 'konva';
+import {
+    loadImage,
+} from './utils'
 
 export class Game {
     stage: Stage;
@@ -10,6 +13,8 @@ export class Game {
     public wins: number = 0
     public losses: number = 0
     public round: number = 0
+    public imgsPaths: { name: string, path: string } [] = []
+    public imgs: { [key: string]: HTMLImageElement } = {}
 
     constructor(idContainer: string, width: number, height: number) {
         this.stage = new Konva.Stage({
@@ -17,8 +22,22 @@ export class Game {
             width: width,
             height: height
         })
+        this.init()
+    }
+    init() {
+        this.imgsPaths = [
+            { name: 'bars', path: 'src/images/icons/bars.svg' },
+            { name: 'xmark', path: 'src/images/icons/xmark.svg' },
+        ]
     }
 
+    async preloadImgs() {
+        this.imgs = {}
+        for (const { name, path } of this.imgsPaths) {
+          this.imgs[name] = await loadImage(path) 
+        }
+      }
+      
     renderHeading() {
         const layer = new Konva.Layer();
 
@@ -212,7 +231,8 @@ export class Game {
         this.stage.add(layer)
     }
 
-    initRender() {
+    async initRender() {
+        await this.preloadImgs()
         this.renderHeading()
         this.renderField()
         this.renderButtons()
