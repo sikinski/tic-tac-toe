@@ -3,6 +3,8 @@ import { Stage } from "konva/lib/Stage"
 import Konva from 'konva';
 import {
     loadImage,
+    drawXMark,
+    drawBars,
 } from './utils'
 
 export class Game {
@@ -13,7 +15,7 @@ export class Game {
     public wins: number = 0
     public losses: number = 0
     public round: number = 0
-    public imgsPaths: { name: string, path: string } [] = []
+    public imgsPaths: { name: string, path: string }[] = []
     public imgs: { [key: string]: HTMLImageElement } = {}
 
     constructor(idContainer: string, width: number, height: number) {
@@ -22,30 +24,30 @@ export class Game {
             width: width,
             height: height
         })
-        this.init()
+        // this.init()
     }
-    init() {
-        this.imgsPaths = [
-            { name: 'bars', path: 'src/images/icons/bars.svg' },
-            { name: 'xmark', path: 'src/images/icons/xmark.svg' },
-        ]
-    }
+    // init() {
+    //     // this.imgsPaths = [
+    //     //     { name: 'bars', path: 'src/images/icons/bars.svg' },
+    //     //     { name: 'xmark', path: 'src/images/icons/xmark.svg' },
+    //     // ]
+    // }
 
-    async preloadImgs() {
-        this.imgs = {}
-        for (const { name, path } of this.imgsPaths) {
-          this.imgs[name] = await loadImage(path) 
-        }
-      }
-      
+    // async preloadImgs() {
+    //     this.imgs = {}
+    //     for (const { name, path } of this.imgsPaths) {
+    //         this.imgs[name] = await loadImage(path)
+    //     }
+    // }
+
     renderHeading() {
         const layer = new Konva.Layer();
 
         const heading = new Konva.Text({
             x: this.stage.width() / 2,
-            y: 10,
+            y: 25,
             text: 'Tic-tac-toe',
-            fontSize: 36,
+            fontSize: 32,
             fontFamily: 'Averta-Bold',
             fill: 'black',
         });
@@ -82,12 +84,12 @@ export class Game {
             const vLine = new Konva.Line({
                 points: [i * dimensionCell, 0, i * dimensionCell, dimensionCell * this.numCell],
                 stroke: '#1f1f1f',
-                strokeWidth: 5,
+                strokeWidth: 4,
             });
             const gLine = new Konva.Line({
                 points: [0, i * dimensionCell, dimensionCell * this.numCell, i * dimensionCell],
                 stroke: '#1f1f1f',
-                strokeWidth: 5,
+                strokeWidth: 4,
             });
             grid.add(vLine)
             grid.add(gLine)
@@ -143,6 +145,11 @@ export class Game {
         }
 
         layer.add(groupBtns)
+        this.stage.add(layer)
+    }
+    toggleNav() {
+        const layer = new Konva.Layer()
+        layer.add(drawBars(15, 15, 25, 25, 'black', 2))
         this.stage.add(layer)
     }
     renderNavigation() {
@@ -221,21 +228,31 @@ export class Game {
                 list.add(bottomItem)
             }
         }
+        const xBtn = {
+            x: container.x() + container.width() + 17,
+            y: container.y() + 17,
+            width: 15,
+            height: 15,
+        }
+
+        const lines = drawXMark(xBtn.x, xBtn.y, 'black', xBtn.width, xBtn.height, 3)
+        layer.add(lines[0], lines[1])
 
         layer.add(container)
         layer.add(borderRight)
         layer.add(heading)
         layer.add(underHeadingLine)
         layer.add(list)
-
         this.stage.add(layer)
+        
     }
 
     async initRender() {
-        await this.preloadImgs()
+        // await this.preloadImgs()
         this.renderHeading()
         this.renderField()
         this.renderButtons()
-        this.renderNavigation()
+        this.toggleNav()
+        // this.renderNavigation()
     }
 }
