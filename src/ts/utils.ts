@@ -44,3 +44,22 @@ export const drawBars = (x: number, y: number, width: number, height: number, co
     }
     return barsIcon
 }
+
+export const drawEllipsis = (x: number, y: number, width: number, height: number, color:string, r: number) => {
+    const icon = new Konva.Group({
+        x: x,
+        y: y,
+    })
+    const distance = width / 3
+
+    for (let i = 0; i < 3; i++) {
+        const circle = new Konva.Circle({
+            x: x + distance * i ,
+            y: y + height / 2,
+            radius: r,
+            fill: color,
+        });
+        icon.add(circle)
+    }
+    return icon
+}

@@ -5,6 +5,7 @@ import {
     loadImage,
     drawXMark,
     drawBars,
+    drawEllipsis,
 } from './utils'
 
 export class Game {
@@ -17,6 +18,8 @@ export class Game {
     public round: number = 0
     public imgsPaths: { name: string, path: string }[] = []
     public imgs: { [key: string]: HTMLImageElement } = {}
+
+    public themes: Array<string> = ['light', 'dark', 'neon', 'anime']
 
     constructor(idContainer: string, width: number, height: number) {
         this.stage = new Konva.Stage({
@@ -244,7 +247,75 @@ export class Game {
         layer.add(underHeadingLine)
         layer.add(list)
         this.stage.add(layer)
-        
+
+    }
+    toggleThemes() {
+        const layer = new Konva.Layer()
+        const width = 30
+        const height = 10
+
+        const toggleBtn = {
+            x: this.stage.width() / 2 - width,
+            y: 15,
+            width: width,
+            height: height,
+            color: 'black',
+            radius: 3,
+        }
+        layer.add(drawEllipsis(toggleBtn.x, toggleBtn.y, toggleBtn.width, toggleBtn.height, toggleBtn.color, toggleBtn.radius))
+        this.stage.add(layer)
+
+        // this.renderPopup(this.stage.width() - 220, toggleBtn.y)
+    }
+
+    renderPopup(x: number, y: number) {
+        const layer = new Konva.Layer()
+        const widthPopup = 200
+
+        const popup = new Konva.Rect({
+            x: x,
+            y: y + 50,
+            width: widthPopup,
+            height: 250,
+            stroke: 'black',
+            strokeWidth: 2,
+            shadowBlur: 5,
+            cornerRadius: 10,
+        });
+        layer.add(popup);
+
+        const heading = new Konva.Text({
+            x: popup.x() + 8,
+            y: popup.y() + 12,
+            text: 'Themes:',
+            fontSize: 28,
+            fontFamily: 'Averta-Bold',
+            fill: 'pink',
+            align: 'center',
+        });
+
+        layer.add(heading)
+
+        const list = new Konva.Group({
+            x: popup.x() + 8,
+            y: popup.y() + 30,
+        })
+
+        for (let i = 0; i < this.themes.length; i++) {
+            const itemText = new Konva.Text({
+                x: 8,
+                y: 20 + 30 * i,
+                text: this.themes[i],
+                fontSize: 20,
+                fontFamily: 'Averta-Bold',
+                fill: 'black',
+                align: 'center',
+            });
+            list.add(itemText)
+        }
+        layer.add(list)
+
+        this.stage.add(layer)
     }
 
     async initRender() {
@@ -254,5 +325,6 @@ export class Game {
         this.renderButtons()
         this.toggleNav()
         // this.renderNavigation()
+        this.toggleThemes()
     }
 }
