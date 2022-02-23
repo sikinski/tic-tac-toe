@@ -39,9 +39,11 @@ export const drawBars = (x: number, y: number, width: number, height: number, co
             strokeWidth: sWidth,
             lineCap: 'round',
             lineJoin: 'round',
+            hitStrokeWidth: 20,
         });
         barsIcon.add(line)
     }
+    
     return barsIcon
 }
 
@@ -59,6 +61,12 @@ export const drawEllipsis = (x: number, y: number, width: number, height: number
             radius: r,
             fill: color,
         });
+        circle.hitFunc(function(context) {
+            context.beginPath();
+            context.rect(0, 0, 30, 30);
+            context.closePath();
+            context.fillStrokeShape(circle);
+          });
         icon.add(circle)
     }
     return icon

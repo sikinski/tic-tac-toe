@@ -18,6 +18,7 @@ export class Game {
     public round: number = 0
     public imgsPaths: { name: string, path: string }[] = []
     public imgs: { [key: string]: HTMLImageElement } = {}
+    public coordsCells: {x1: number, y1: number, x2: number, y2: number}[] = []
 
     public themes: Array<string> = ['light', 'dark', 'neon', 'anime']
 
@@ -74,6 +75,7 @@ export class Game {
             shadowBlur: 10,
             cornerRadius: 10,
         });
+        // console.log(field.getRelativePointerPosition());
 
         layer.add(field);
 
@@ -98,6 +100,37 @@ export class Game {
             grid.add(gLine)
         }
         layer.add(grid)
+
+        const cellWidth = field.width() / this.numCell
+        const cellHeight = field.height() / this.numCell
+
+        const addCoords = () => {
+            for (let i = 0; i < this.numCell; i++) {
+                for (let j = 0; j < this.numCell; j++) {
+                    this.coordsCells.push({
+                        x1: cellWidth * j,
+                        y1: cellHeight * i,
+                        x2: cellWidth * (j + 1),
+                        y2: cellHeight * (i + 1)
+                    },
+                    )
+                }
+            }
+            console.log(this.coordsCells)
+        }
+        addCoords()
+
+        field.on('mouseup', () => {
+            const posX = field.getRelativePointerPosition().x
+            const posY = field.getRelativePointerPosition().y
+            for (let i = 0; i < this.coordsCells.length; i++) {
+                if (
+                    this.coordsCells[i].x1 <= posX && this.coordsCells[i].x2 >= posX && this.coordsCells[i].y1 <= posY && this.coordsCells[i].y2 >= posY) {
+                    console.log(`${i + 1}`)
+                }
+            }
+        })
+
         this.stage.add(layer);
     }
     renderButtons() {
@@ -146,13 +179,22 @@ export class Game {
             groupBtns.add(btn)
             groupBtns.add(text)
         }
+        groupBtns.on('mousedown', function () {
+            console.log('btn clicked')
+        });
 
         layer.add(groupBtns)
         this.stage.add(layer)
     }
     toggleNav() {
         const layer = new Konva.Layer()
-        layer.add(drawBars(15, 15, 25, 25, 'black', 2))
+        const btn = drawBars(15, 15, 25, 25, 'black', 2)
+        layer.add(btn)
+
+        btn.on('mousedown', () => {
+            console.log('clicked')
+        })
+
         this.stage.add(layer)
     }
     renderNavigation() {
@@ -262,7 +304,13 @@ export class Game {
             color: 'black',
             radius: 3,
         }
-        layer.add(drawEllipsis(toggleBtn.x, toggleBtn.y, toggleBtn.width, toggleBtn.height, toggleBtn.color, toggleBtn.radius))
+        const btn = drawEllipsis(toggleBtn.x, toggleBtn.y, toggleBtn.width, toggleBtn.height, toggleBtn.color, toggleBtn.radius)
+        layer.add(btn)
+
+        btn.on('mousedown', function () {
+            console.log('toggle clicked')
+        });
+
         this.stage.add(layer)
 
         // this.renderPopup(this.stage.width() - 220, toggleBtn.y)
