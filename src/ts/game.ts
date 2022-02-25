@@ -7,6 +7,7 @@ import {
     drawBars,
     drawEllipsis,
 } from './utils'
+import { Rect } from "konva/lib/shapes/Rect";
 
 export class Game {
     stage: Stage;
@@ -18,7 +19,7 @@ export class Game {
     public round: number = 0
     public imgsPaths: { name: string, path: string }[] = []
     public imgs: { [key: string]: HTMLImageElement } = {}
-    public coordsCells: {x1: number, y1: number, x2: number, y2: number}[] = []
+    public coordsCells: { x1: number, y1: number, x2: number, y2: number }[] = []
 
     public themes: Array<string> = ['light', 'dark', 'neon', 'anime']
 
@@ -116,7 +117,6 @@ export class Game {
                     )
                 }
             }
-            console.log(this.coordsCells)
         }
         addCoords()
 
@@ -188,109 +188,133 @@ export class Game {
     }
     toggleNav() {
         const layer = new Konva.Layer()
-        const btn = drawBars(15, 15, 25, 25, 'black', 2)
-        layer.add(btn)
 
-        btn.on('mousedown', () => {
-            console.log('clicked')
+        const renderBars = () => {
+            const btn = drawBars(15, 15, 25, 25, 'black', 2)
+            layer.add(btn)
+            return btn
+        }
+        renderBars()
+
+        renderBars().on('mouseup', () => {
+            // here
+
+            renderNav()
         })
 
-        this.stage.add(layer)
-    }
-    renderNavigation() {
-        const layer = new Konva.Layer()
+        const renderXMark = (container: Rect) => {
 
-        const container = new Konva.Rect({
-            x: 0,
-            y: 0,
-            width: this.stage.width() / 6,
-            height: this.stage.height(),
-        });
-        const borderRight = new Konva.Line({
-            points: [container.x() + container.width(), container.y(), container.x() + container.width(), container.y() + container.height()],
-            stroke: 'black',
-            shadowColor: 'black',
-            shadowBlur: 15,
-            shadowOffset: { x: 0, y: 10 },
-            shadowOpacity: 0.5,
-            strokeWidth: 2,
-            lineCap: 'round',
-        })
-
-        const heading = new Konva.Text({
-            x: container.x(),
-            y: 15,
-            width: container.width(),
-            text: 'menu',
-            fontSize: 30,
-            fontFamily: 'Averta-Bold',
-            align: 'center',
-            fill: 'black',
-        })
-
-        const underHeadingLine = new Konva.Line({
-            points: [heading.x(), heading.y() + heading.height() + 15, heading.x() + heading.width(), heading.y() + heading.height() + 15],
-            stroke: 'black',
-            shadowColor: 'black',
-            shadowBlur: 15,
-            shadowOffset: { x: 0, y: 10 },
-            shadowOpacity: 0.5,
-            strokeWidth: 2,
-            lineCap: 'round',
-        })
-
-        const list = new Konva.Group({
-            x: container.x(),
-            y: 40,
-        });
-
-        const items = [`round: ${this.round}`, `won: ${this.wins}`, `lost: ${this.losses}`, '3x3', '6x6', '9x9', 'info'];
-
-        for (let i = 0; i < items.length; i++) {
-            if (i < items.length - 1) {
-                const item = new Konva.Text({
-                    x: list.x(),
-                    y: list.y() + 20 + 60 * i,
-                    width: container.width(),
-                    text: items[i],
-                    fontSize: 20,
-                    fontFamily: 'Averta-Bold',
-                    align: 'center',
-                    fill: 'black',
-                })
-                list.add(item)
-            } else {
-                const bottomItem = new Konva.Text({
-                    x: list.x(),
-                    y: list.y() + container.height() - heading.height() - 100,
-                    width: container.width(),
-                    text: items[i],
-                    fontSize: 20,
-                    fontFamily: 'Averta-Bold',
-                    align: 'center',
-                    fill: 'black',
-                })
-                list.add(bottomItem)
+            const xBtn = {
+                x: container.x() + container.width() + 17,
+                y: container.y() + 17,
+                width: 15,
+                height: 15,
             }
-        }
-        const xBtn = {
-            x: container.x() + container.width() + 17,
-            y: container.y() + 17,
-            width: 15,
-            height: 15,
+            const lines = drawXMark(xBtn.x, xBtn.y, 'black', xBtn.width, xBtn.height, 3)
+            layer.add(lines[0], lines[1])
+
+            lines.forEach((e) => {
+                e.on('mouseup', () => {
+                    // here
+
+                    this.stage.container().style.cursor = 'default';
+
+                    renderBars()
+                })
+            })
         }
 
-        const lines = drawXMark(xBtn.x, xBtn.y, 'black', xBtn.width, xBtn.height, 3)
-        layer.add(lines[0], lines[1])
+        const renderNav = () => {
+            const container = new Konva.Rect({
+                x: 0,
+                y: 0,
+                width: this.stage.width() / 6,
+                height: this.stage.height(),
+            });
+            layer.add(container)
 
-        layer.add(container)
-        layer.add(borderRight)
-        layer.add(heading)
-        layer.add(underHeadingLine)
-        layer.add(list)
+            const borderRight = new Konva.Line({
+                points: [container.x() + container.width(), container.y(), container.x() + container.width(), container.y() + container.height()],
+                stroke: 'black',
+                shadowColor: 'black',
+                shadowBlur: 15,
+                shadowOffset: { x: 0, y: 10 },
+                shadowOpacity: 0.5,
+                strokeWidth: 2,
+                lineCap: 'round',
+            })
+            layer.add(borderRight)
+
+
+            const heading = new Konva.Text({
+                x: container.x(),
+                y: 15,
+                width: container.width(),
+                text: 'menu',
+                fontSize: 30,
+                fontFamily: 'Averta-Bold',
+                align: 'center',
+                fill: 'black',
+            })
+            layer.add(heading)
+
+
+            const underHeadingLine = new Konva.Line({
+                points: [heading.x(), heading.y() + heading.height() + 15, heading.x() + heading.width(), heading.y() + heading.height() + 15],
+                stroke: 'black',
+                shadowColor: 'black',
+                shadowBlur: 15,
+                shadowOffset: { x: 0, y: 10 },
+                shadowOpacity: 0.5,
+                strokeWidth: 2,
+                lineCap: 'round',
+            })
+            layer.add(underHeadingLine)
+
+
+            const list = new Konva.Group({
+                x: container.x(),
+                y: 40,
+            });
+
+            const items = [`round: ${this.round}`, `won: ${this.wins}`, `lost: ${this.losses}`, '3x3', '6x6', '9x9', 'info'];
+
+            for (let i = 0; i < items.length; i++) {
+                if (i < items.length - 1) {
+                    const item = new Konva.Text({
+                        x: list.x(),
+                        y: list.y() + 20 + 60 * i,
+                        width: container.width(),
+                        text: items[i],
+                        fontSize: 20,
+                        fontFamily: 'Averta-Bold',
+                        align: 'center',
+                        fill: 'black',
+                    })
+                    list.add(item)
+                } else {
+                    const bottomItem = new Konva.Text({
+                        x: list.x(),
+                        y: list.y() + container.height() - heading.height() - 100,
+                        width: container.width(),
+                        text: items[i],
+                        fontSize: 20,
+                        fontFamily: 'Averta-Bold',
+                        align: 'center',
+                        fill: 'black',
+                    })
+                    list.add(bottomItem)
+                }
+
+            }
+            layer.add(list)
+
+            renderXMark(container)
+        }
+
         this.stage.add(layer)
-
     }
+
     toggleThemes() {
         const layer = new Konva.Layer()
         const width = 30
