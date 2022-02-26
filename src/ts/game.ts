@@ -8,6 +8,7 @@ import {
     drawEllipsis,
 } from './utils'
 import { Rect } from "konva/lib/shapes/Rect";
+import { Group } from "konva/lib/Group";
 
 export class Game {
     stage: Stage;
@@ -20,6 +21,7 @@ export class Game {
     public imgsPaths: { name: string, path: string }[] = []
     public imgs: { [key: string]: HTMLImageElement } = {}
     public coordsCells: { x1: number, y1: number, x2: number, y2: number }[] = []
+    public modalOpen: boolean = false
 
     public themes: Array<string> = ['light', 'dark', 'neon', 'anime']
 
@@ -186,51 +188,29 @@ export class Game {
         layer.add(groupBtns)
         this.stage.add(layer)
     }
+
     toggleNav() {
         const layer = new Konva.Layer()
-
-        const renderBars = () => {
-            const btn = drawBars(15, 15, 25, 25, 'black', 2)
-            layer.add(btn)
-            return btn
-        }
-        renderBars()
-
-        renderBars().on('mouseup', () => {
-            // here
-
-            renderNav()
-        })
-
-        const renderXMark = (container: Rect) => {
-
-            const xBtn = {
-                x: container.x() + container.width() + 17,
-                y: container.y() + 17,
-                width: 15,
-                height: 15,
-            }
-            const lines = drawXMark(xBtn.x, xBtn.y, 'black', xBtn.width, xBtn.height, 3)
-            layer.add(lines[0], lines[1])
-
-            lines.forEach((e) => {
-                e.on('mouseup', () => {
-                    // here
-
-                    this.stage.container().style.cursor = 'default';
-
-                    renderBars()
-                })
-            })
-        }
+        let modalOpen = false
 
         const renderNav = () => {
-            const container = new Konva.Rect({
-                x: 0,
+            const widthPanel = this.stage.width() / 6
+
+            let container: Rect
+            let offsetXNav
+            if (modalOpen) {
+                offsetXNav = 0
+            } else {
+                offsetXNav = -widthPanel - 15
+            }
+
+            container = new Konva.Rect({
+                x: offsetXNav,
                 y: 0,
-                width: this.stage.width() / 6,
+                width: widthPanel,
                 height: this.stage.height(),
             });
+
             layer.add(container)
 
             const borderRight = new Konva.Line({
@@ -308,10 +288,45 @@ export class Game {
 
             }
             layer.add(list)
-
-            renderXMark(container)
+            renderBtn(container)
         }
 
+        let btn: Group;
+
+        const renderBtn = (container: Rect) => {
+            if (!modalOpen) {
+                btn = drawBars(15, 15, 25, 25, 'black', 2)
+
+                btn.on('mouseup', () => {
+
+                    btn.hide()
+
+                    modalOpen = true
+                    layer.removeChildren()
+
+                    renderNav()
+                })
+            } else {
+                btn.hide()
+                const btnMethics = {
+                    x: container.x() + container.width() + 17,
+                    y: container.y() + 17,
+                    width: 15,
+                    height: 15,
+                }
+                btn = drawXMark(btnMethics.x, btnMethics.y, 'black', btnMethics.width, btnMethics.height, 3)
+
+                btn.on('mouseup', () => {
+                    btn.hide()
+                    modalOpen = false
+                    layer.removeChildren()
+                    renderNav()
+                })
+            }
+            layer.add(btn)
+        }
+
+        renderNav()
         this.stage.add(layer)
     }
 

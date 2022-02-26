@@ -9,22 +9,29 @@ export const loadImage = async (src: string): Promise<HTMLImageElement> => {
     })
 }
 
-export const drawXMark = (x1: number, y1: number, color: string, width: number, height: number, sWidth: number) => {
+export const drawXMark = (x: number, y: number, color: string, width: number, height: number, sWidth: number) => {
+    const btn = new Konva.Group({
+        x: x, 
+        y: y,
+    })
     const line1 = new Konva.Line({
-        points: [x1, y1, x1 + width, y1 + height],
+        points: [0, btn.y(), 0 + width, btn.y() + height],
         stroke: color,
         strokeWidth: sWidth,
         lineCap: 'round',
         hitStrokeWidth: 15,
     });
     const line2 = new Konva.Line({
-        points: [x1 + width, y1, x1, y1 + height],
+        points: [0 + width, btn.y(), 0, btn.y() + height],
         stroke: color,
         strokeWidth: sWidth,
         lineCap: 'round',
         hitStrokeWidth: 15,
     });
-    return [line1, line2]
+    btn.add(line1)
+    btn.add(line2)
+
+    return btn
 }
 export const drawBars = (x: number, y: number, width: number, height: number, color: string, sWidth: number) => {
 
