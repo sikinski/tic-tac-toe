@@ -197,7 +197,9 @@ export class Game {
             const widthPanel = this.stage.width() / 6
 
             let container: Rect
+
             let offsetXNav
+
             if (modalOpen) {
                 offsetXNav = 0
             } else {
@@ -298,12 +300,9 @@ export class Game {
                 btn = drawBars(15, 15, 25, 25, 'black', 2)
 
                 btn.on('mouseup', () => {
-
                     btn.hide()
-
                     modalOpen = true
                     layer.removeChildren()
-
                     renderNav()
                 })
             } else {
@@ -334,6 +333,7 @@ export class Game {
         const layer = new Konva.Layer()
         const width = 30
         const height = 10
+        let popupOpen = false
 
         const toggleBtn = {
             x: this.stage.width() / 2 - width,
@@ -346,61 +346,69 @@ export class Game {
         const btn = drawEllipsis(toggleBtn.x, toggleBtn.y, toggleBtn.width, toggleBtn.height, toggleBtn.color, toggleBtn.radius)
         layer.add(btn)
 
-        btn.on('mousedown', function () {
-            console.log('toggle clicked')
-        });
+        const renderPopup = () => {
+            const widthPopup = 180
 
-        this.stage.add(layer)
+            const popup = new Konva.Rect({
+                x: this.stage.width() - 200,
+                y: toggleBtn.y + 50,
+                width: widthPopup,
+                stroke: 'black',
+                strokeWidth: 2,
+                shadowBlur: 3,
+                cornerRadius: 7,
+            });
+            layer.add(popup);
 
-        // this.renderPopup(this.stage.width() - 220, toggleBtn.y)
-    }
-
-    renderPopup(x: number, y: number) {
-        const layer = new Konva.Layer()
-        const widthPopup = 200
-
-        const popup = new Konva.Rect({
-            x: x,
-            y: y + 50,
-            width: widthPopup,
-            height: 250,
-            stroke: 'black',
-            strokeWidth: 2,
-            shadowBlur: 5,
-            cornerRadius: 10,
-        });
-        layer.add(popup);
-
-        const heading = new Konva.Text({
-            x: popup.x() + 8,
-            y: popup.y() + 12,
-            text: 'Themes:',
-            fontSize: 28,
-            fontFamily: 'Averta-Bold',
-            fill: 'pink',
-            align: 'center',
-        });
-
-        layer.add(heading)
-
-        const list = new Konva.Group({
-            x: popup.x() + 8,
-            y: popup.y() + 30,
-        })
-
-        for (let i = 0; i < this.themes.length; i++) {
-            const itemText = new Konva.Text({
-                x: 8,
-                y: 20 + 30 * i,
-                text: this.themes[i],
-                fontSize: 20,
+            const heading = new Konva.Text({
+                x: popup.x(),
+                y: popup.y() + 12,
+                width: popup.width(),
+                text: 'Themes:',
+                fontSize: 28,
                 fontFamily: 'Averta-Bold',
-                fill: 'black',
+                fill: 'pink',
                 align: 'center',
             });
-            list.add(itemText)
+
+            layer.add(heading)
+
+            const list = new Konva.Group({
+                x: popup.x(),
+                y: popup.y() + 30,
+            })
+
+            let heightItems = 0;
+
+            for (let i = 0; i < this.themes.length; i++) {
+                const itemText = new Konva.Text({
+                    x: 0,
+                    y: 35 + 30 * i,
+                    text: this.themes[i],
+                    fontSize: 20,
+                    width: popup.width(),
+                    fontFamily: 'Averta-Bold',
+                    fill: 'black',
+                    align: 'center',
+                });
+                list.add(itemText)
+                heightItems += itemText.height() + 30
+            }
+
+            popup.setAttr('height', heading.height() + heightItems);
+            layer.add(list)
         }
-        layer.add(list)
+
+        btn.on('mouseup', () => {
+            if (popupOpen) {
+                layer.removeChildren()
+                this.toggleThemes()
+            } else {
+                renderPopup()
+                popupOpen = true
+            }
+
+        });
 
         this.stage.add(layer)
     }

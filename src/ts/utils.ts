@@ -11,7 +11,7 @@ export const loadImage = async (src: string): Promise<HTMLImageElement> => {
 
 export const drawXMark = (x: number, y: number, color: string, width: number, height: number, sWidth: number) => {
     const btn = new Konva.Group({
-        x: x, 
+        x: x,
         y: y,
     })
     const line1 = new Konva.Line({
@@ -52,11 +52,11 @@ export const drawBars = (x: number, y: number, width: number, height: number, co
         });
         barsIcon.add(line)
     }
-    
+
     return barsIcon
 }
 
-export const drawEllipsis = (x: number, y: number, width: number, height: number, color:string, r: number) => {
+export const drawEllipsis = (x: number, y: number, width: number, height: number, color: string, r: number) => {
     const icon = new Konva.Group({
         x: x,
         y: y,
@@ -65,17 +65,17 @@ export const drawEllipsis = (x: number, y: number, width: number, height: number
 
     for (let i = 0; i < 3; i++) {
         const circle = new Konva.Circle({
-            x: x + distance * i ,
+            x: x + distance * i,
             y: y + height / 2,
             radius: r,
             fill: color,
         });
-        circle.hitFunc(function(context) {
+        circle.hitFunc(function (context) {
             context.beginPath();
-            context.rect(0, 0, 30, 30);
+            context.rect(-20, -20, 40, 40);
             context.closePath();
             context.fillStrokeShape(circle);
-          });
+        });
         icon.add(circle)
     }
     return icon
