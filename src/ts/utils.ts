@@ -15,14 +15,14 @@ export const drawXMark = (x: number, y: number, color: string, width: number, he
         y: y,
     })
     const line1 = new Konva.Line({
-        points: [0, btn.y(), 0 + width, btn.y() + height],
+        points: [0, 0, 0 + width, 0 + height],
         stroke: color,
         strokeWidth: sWidth,
         lineCap: 'round',
         hitStrokeWidth: 15,
     });
     const line2 = new Konva.Line({
-        points: [0 + width, btn.y(), 0, btn.y() + height],
+        points: [0 + width, 0, 0,0 + height],
         stroke: color,
         strokeWidth: sWidth,
         lineCap: 'round',

@@ -1,4 +1,5 @@
 import { Stage } from "konva/lib/Stage"
+import { Layer } from "konva/lib/Layer"
 
 import Konva from 'konva';
 import {
@@ -12,16 +13,24 @@ import { Group } from "konva/lib/Group";
 
 export class Game {
     stage: Stage;
+
+    // state
     public numCell: number = 3
-    public btnArea: Array<object> = []
     public numPlayers: number = 1
+    public round: number = 0
     public wins: number = 0
     public losses: number = 0
-    public round: number = 0
+    public actualMove: string = 'x'
+
+    // booleans
+    public modalOpen: boolean = false
+    public popupOpen: boolean = false
+
+    // others
+    public btnArea: Array<object> = []
     public imgsPaths: { name: string, path: string }[] = []
     public imgs: { [key: string]: HTMLImageElement } = {}
     public coordsCells: { x1: number, y1: number, x2: number, y2: number }[] = []
-    public modalOpen: boolean = false
 
     public themes: Array<string> = ['light', 'dark', 'neon', 'anime']
 
@@ -47,38 +56,22 @@ export class Game {
     //     }
     // }
 
-    renderHeading() {
-        const layer = new Konva.Layer();
-
-        const heading = new Konva.Text({
-            x: this.stage.width() / 2,
-            y: 25,
-            text: 'Tic-tac-toe',
-            fontSize: 32,
-            fontFamily: 'Averta-Bold',
-            fill: 'black',
-        });
-        heading.offsetX(heading.width() / 2);
-        layer.add(heading);
-        this.stage.add(layer)
-    }
     renderField() {
         const layer = new Konva.Layer();
 
-        const dimensionField: number = 380
-        const offsetX: number = this.stage.width() / 2 - dimensionField / 2
-        const offsetY: number = (this.stage.height() / 2 - dimensionField / 2) - 20
-
         const field = new Konva.Rect({
-            x: offsetX,
-            y: offsetY,
-            width: dimensionField,
-            height: dimensionField,
+            height: this.stage.height() / 1.5,
             fill: 'MistyRose',
             shadowBlur: 10,
             cornerRadius: 10,
         });
-        // console.log(field.getRelativePointerPosition());
+        field.setAttr('width', field.height())
+
+        const offsetX = this.stage.width() / 2 - field.width() / 2
+        const offsetY = (this.stage.height() / 2 - field.height() / 2) - 50
+        field.setAttr('x', offsetX)
+        field.setAttr('y', offsetY)
+        const dimensionField = field.height()
 
         layer.add(field);
 
@@ -122,18 +115,8 @@ export class Game {
         }
         addCoords()
 
-        field.on('mouseup', () => {
-            const posX = field.getRelativePointerPosition().x
-            const posY = field.getRelativePointerPosition().y
-            for (let i = 0; i < this.coordsCells.length; i++) {
-                if (
-                    this.coordsCells[i].x1 <= posX && this.coordsCells[i].x2 >= posX && this.coordsCells[i].y1 <= posY && this.coordsCells[i].y2 >= posY) {
-                    console.log(`${i + 1}`)
-                }
-            }
-        })
-
         this.stage.add(layer);
+        this.clickHandler(field, layer)
     }
     renderButtons() {
         const layer = new Konva.Layer()
@@ -232,8 +215,8 @@ export class Game {
                 x: container.x(),
                 y: 15,
                 width: container.width(),
-                text: 'menu',
-                fontSize: 30,
+                text: 'Tic-tac-toe',
+                fontSize: 26,
                 fontFamily: 'Averta-Bold',
                 align: 'center',
                 fill: 'black',
@@ -333,7 +316,6 @@ export class Game {
         const layer = new Konva.Layer()
         const width = 30
         const height = 10
-        let popupOpen = false
 
         const toggleBtn = {
             x: this.stage.width() / 2 - width,
@@ -400,26 +382,66 @@ export class Game {
         }
 
         btn.on('mouseup', () => {
-            if (popupOpen) {
+            if (this.popupOpen) {
                 layer.removeChildren()
+                this.popupOpen = false
                 this.toggleThemes()
             } else {
                 renderPopup()
-                popupOpen = true
+                this.popupOpen = true
             }
-
         });
 
         this.stage.add(layer)
     }
 
+    clickHandler = async (field: Rect, layer: Layer) => {
+        field.on('mouseup', () => {
+            let clickedCellNum: number;
+            const pos = field.getRelativePointerPosition()
+
+            for (let i = 0; i < this.coordsCells.length; i++) {
+                if (
+                    this.coordsCells[i].x1 <= pos.x && this.coordsCells[i].x2 >= pos.x && this.coordsCells[i].y1 <= pos.y && this.coordsCells[i].y2 >= pos.y) {
+
+                    clickedCellNum = i
+
+                    const clickedCell = this.coordsCells[clickedCellNum]
+
+                    const padding = (clickedCell.x2 - clickedCell.x1) / 4
+                    const width = clickedCell.x2 - clickedCell.x1 - padding * 2
+                    const height = clickedCell.y2 - clickedCell.y1 - padding * 2
+                    const offsetX = Math.floor(field.x()) + clickedCell.x1 + padding
+                    const offsetY = Math.floor(field.y()) + clickedCell.y1 + padding
+
+                    // Moving
+                    if (this.actualMove === 'x') {
+                        const xMark = drawXMark(offsetX, offsetY, 'black', width, height, 5)
+                        layer.add(xMark)
+                        this.actualMove = 'o'
+                    } else if (this.actualMove === 'o') {
+                        const oMark = new Konva.Circle({
+                            radius: width / 2,
+                            stroke: 'black',
+                            strokeWidth: 4,
+                        })
+                        oMark.setAttr('x', offsetX + oMark.radius())
+                        oMark.setAttr('y', offsetY + oMark.radius())
+
+                        layer.add(oMark)
+                        this.actualMove = 'x'
+                    }
+
+                }
+            }
+        })
+    }
+
     async initRender() {
         // await this.preloadImgs()
-        this.renderHeading()
         this.renderField()
         this.renderButtons()
         this.toggleNav()
-        // this.renderNavigation()
         this.toggleThemes()
     }
 }
