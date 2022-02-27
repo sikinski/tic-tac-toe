@@ -10,6 +10,7 @@ import {
 } from './utils'
 import { Rect } from "konva/lib/shapes/Rect";
 import { Group } from "konva/lib/Group";
+import { BtnArea } from './interfaces'
 
 export class Game {
     stage: Stage;
@@ -27,7 +28,7 @@ export class Game {
     public popupOpen: boolean = false
 
     // others
-    public btnArea: Array<object> = []
+    // public btnAreas: Array<object> = []
     public imgsPaths: { name: string, path: string }[] = []
     public imgs: { [key: string]: HTMLImageElement } = {}
     public coordsCells: { x1: number, y1: number, x2: number, y2: number }[] = []
@@ -118,6 +119,7 @@ export class Game {
         this.stage.add(layer);
         this.clickHandler(field, layer)
     }
+
     renderButtons() {
         const layer = new Konva.Layer()
 
@@ -125,17 +127,20 @@ export class Game {
         const heightBtn = 50
         const margin = 25
 
-        const names = ['changeXO', 'restart', `players (${this.numPlayers})`]
+        const names = ['changeXO', 'restart', 'players']
 
         const groupBtns = new Konva.Group({
             x: this.stage.width() / 2 - (widthBtn * names.length + margin) / 2,
             y: this.stage.height() - heightBtn * 2,
         });
 
+        let btnAreas: Array<BtnArea> = []
+
+
         for (let i = 0; i < names.length; i++) {
             const btn = new Konva.Rect({
                 x: i * widthBtn + i * margin,
-                y: 13,
+                y: 0,
                 width: widthBtn,
                 height: heightBtn,
                 name: names[i],
@@ -159,17 +164,15 @@ export class Game {
                 verticalAlign: 'middle',
             })
 
-            this.btnArea.push({ name: btn.name(), x: btn.x(), y: btn.y(), width: widthBtn, height: heightBtn }) // coords inside the group!
+            btnAreas.push({ name: btn.name(), x1: btn.x(), y1: btn.y(), x2: btn.x() + widthBtn, y2: btn.y() + heightBtn })
 
             groupBtns.add(btn)
             groupBtns.add(text)
         }
-        groupBtns.on('mousedown', function () {
-            console.log('btn clicked')
-        });
 
         layer.add(groupBtns)
         this.stage.add(layer)
+        this.btnClick(groupBtns, btnAreas, layer)
     }
 
     toggleNav() {
@@ -435,6 +438,32 @@ export class Game {
                 }
             }
         })
+    }
+    btnClick = (groupBtns: Group, btnAreas: Array<BtnArea>, layer: Layer) => {
+
+        groupBtns.on('mousedown', () => {
+            const pos = groupBtns.getRelativePointerPosition()
+
+            const area = btnAreas.find((obj) => obj.x1 <= pos.x && obj.x2 >= pos.x && obj.y1 <= pos.y && obj.y2 >= pos.y)
+
+            if (area && area.name) {
+                if (area.name === 'changeXO') {
+                    this.actualMove = 'o'
+                } else if (area.name === 'restart') {
+                    this.newGame()
+                } else if (area.name === 'players') {
+                    this.numPlayers = this.numPlayers === 1 ? 2 : 1
+                }
+            }
+        });
+    }
+    newGame = () => {
+        this.numCell = 3
+        this.numPlayers = 1
+        this.round = 0
+        this.wins = 0
+        this.losses = 0
+        this.actualMove = 'x'
     }
 
     async initRender() {
